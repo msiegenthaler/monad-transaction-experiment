@@ -2,22 +2,17 @@ package mt
 
 trait TransactionContext
 
-trait CommitRollbackAware {
-  protected def commit = ()
-  protected def rollback = ()
-}
-
 trait Transaction[A] extends Function1[TransactionContext, A] {
-  def apply(t: TransactionContext): A
+  def apply(context: TransactionContext): A
 
   import Transaction._
   final def map[B](f: A => B): Transaction[B] = {
-    lift(t => f(apply(t)))
+    lift(context => f(apply(context)))
   }
   final def flatMap[B](f: A => Transaction[B]): Transaction[B] = {
-    lift { t =>
-      val a = apply(t)
-      f(a)(t)
+    lift { context =>
+      val a = apply(context)
+      f(a)(context)
     }
   }
 }
@@ -27,7 +22,7 @@ object Transaction {
   def bind[A](a: A) = apply(a)
 
   implicit def lift[A](f: TransactionContext => A): Transaction[A] = new Transaction[A] {
-    override def apply(t: TransactionContext) = f(t)
+    override def apply(context: TransactionContext) = f(context)
   }
 
   implicit class RichTraversable[A](data: Traversable[A]) {

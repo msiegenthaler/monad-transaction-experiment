@@ -4,13 +4,16 @@ import scala.xml.Elem
 
 case class SamlAssertion(data: String)
 
-trait Webservice extends TransactionContext {
-  def assertion: SamlAssertion
+trait WebserviceContext extends TransactionContext {
+  val webservice: Webservice
+  trait Webservice {
+    def assertion: SamlAssertion
+  }
 }
 
 object Webservice {
   def apply(url: String, input: Elem) = Transaction.lift(_ match {
-    case t: Webservice =>
+    case context: WebserviceContext =>
       println(s"--> Calling Webservice $url")
       <response>
         <you-asked-for>{ input }</you-asked-for>
