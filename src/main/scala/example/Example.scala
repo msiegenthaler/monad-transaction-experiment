@@ -42,10 +42,13 @@ object Example extends App {
 
     val quote = session { carService.quoteFor("Ford Mustard") }
     quote.filter(_.price.dollars < 100).foreach { quote =>
-      println(s"Do I really want to sell ${quote.car.name} for ${quote.price.dollars}")
+      println(s"Do I really want to sell ${quote.car.name} for ${quote.price.dollars}?")
       session { carService.sell(quote.car, quote.price) }
       println("sold car")
     }
+
+    val quote2 = session { carService.quoteFor("Ford Mustard") }
+    println(s"New quote: $quote2")
   }
 
 }
