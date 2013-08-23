@@ -2,10 +2,16 @@ package example
 
 import mt._
 import javax.sql.DataSource
+import org.h2.jdbcx.JdbcDataSource
 
 object Example extends App {
+  val dataSource = new JdbcDataSource
+  dataSource.setURL("jdbc:h2:mem:car")
+
+  val messaging = new ConnectionFactory
+
   // Usage example below
-  val carDomain = CarDomain(null, null)
+  val carDomain = CarDomain(messaging, dataSource)
   import CarDomain.Services._
 
   //boot
@@ -15,8 +21,10 @@ object Example extends App {
       _ <- carService.buy("Opel Astro")
     } yield ()
 
+    println("Setup will buy a few cars, so we're ready to go")
     carDomain.openBatch(setup)
   }
+  println("Everything set up")
 
   /// example
   {
