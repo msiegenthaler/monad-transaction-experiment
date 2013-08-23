@@ -1,8 +1,9 @@
 package example
 
-import mt._
-import javax.sql.DataSource
+import java.sql.Connection
 import org.h2.jdbcx.JdbcDataSource
+import anorm._
+import mt._
 
 object Example extends App {
   val dataSource = new JdbcDataSource
@@ -16,11 +17,20 @@ object Example extends App {
 
   //boot
   {
+    def ddl = { implicit c: Connection =>
+      SQL("CREATE SEQUENCE car_id_seq").execute
+      SQL("""CREATE TABLE car(
+              id bigint not null default nextval('car_id_seq'),
+              name varchar(1023) not null)""").execute
+    }
+
     val setup = for {
       _ <- carService.buy("Ford Mustard")
       _ <- carService.buy("Opel Astro")
     } yield ()
 
+    println("Creating tables")
+    carDomain.openBatch(Jdbc(ddl))
     println("Setup will buy a few cars, so we're ready to go")
     carDomain.openBatch(setup)
   }
