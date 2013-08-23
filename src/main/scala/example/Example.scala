@@ -17,7 +17,7 @@ object Example extends App {
 
   //boot
   {
-    def ddl = { implicit c: Connection =>
+    def ddl = Jdbc { implicit c: Connection =>
       SQL("CREATE SEQUENCE car_id_seq").execute
       SQL("""CREATE TABLE car(
               id bigint not null default nextval('car_id_seq'),
@@ -30,7 +30,7 @@ object Example extends App {
     } yield ()
 
     println("Creating tables")
-    carDomain.openBatch(Jdbc(ddl))
+    carDomain.openBatch(ddl)
     println("Setup will buy a few cars, so we're ready to go")
     carDomain.openBatch(setup)
   }
