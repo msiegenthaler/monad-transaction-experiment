@@ -5,6 +5,8 @@ trait TransactionContext
 trait Transaction[A] extends Function1[TransactionContext, A] {
   def apply(context: TransactionContext): A
 
+  def run()(implicit context: TransactionContext) = apply(context)
+
   import Transaction._
   final def map[B](f: A => B): Transaction[B] = {
     lift(context => f(apply(context)))
@@ -24,6 +26,8 @@ object Transaction {
   implicit def lift[A](f: TransactionContext => A): Transaction[A] = new Transaction[A] {
     override def apply(context: TransactionContext) = f(context)
   }
+
+  implicit def autoApply[A](t: Transaction[A])(implicit context: TransactionContext): A = t(context)
 
   implicit class RichTraversable[A](data: Traversable[A]) {
     def mapTransaction[B](f: A => Transaction[B]): Transaction[List[B]] = {

@@ -21,10 +21,10 @@ trait CarService {
   } yield ()
 
   // same functionality as sell, but different style.
-  def sell2(car: Car, forPrice: Price) = lift { t =>
-    repo.byId(car.id)(t).getOrElse(throw new IllegalStateException(s"car ${car.id} already sold"))
-    repo.remove(car.id)(t)
-    estimator.submitSale(car, forPrice)(t)
+  def sell2(car: Car, forPrice: Price) = lift { implicit context =>
+    repo.byId(car.id).getOrElse(throw new IllegalStateException(s"car ${car.id} already sold"))
+    repo.remove(car.id).run
+    estimator.submitSale(car, forPrice).run
   }
 
   def buy(name: String) = repo.add(name).map(_ => ())
