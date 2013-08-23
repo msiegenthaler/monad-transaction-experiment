@@ -2,6 +2,7 @@ package example
 
 import javax.sql.DataSource
 import mt._
+import scala.concurrent.ExecutionContext
 
 case class User(name: String, assertion: SamlAssertion)
 trait Session {
@@ -15,7 +16,7 @@ trait CarDomain {
 }
 
 object CarDomain {
-  def apply(messagingConnectionFactory: ConnectionFactory, database: DataSource): CarDomain = new CarDomain {
+  def apply(messagingConnectionFactory: ConnectionFactory, database: DataSource, proxyOut: Option[(String, Int)]): CarDomain = new CarDomain {
     override def open(implicit forUser: User): Session = new Session {
       override val user = forUser
       override def apply[A](transaction: Transaction[A]) = Ctx(user)(transaction)
@@ -56,6 +57,8 @@ object CarDomain {
       }
       val webservice = new Webservice {
         override def assertion = user.assertion
+        override def exec = ExecutionContext.global
+        override def proxy = proxyOut
       }
     }
   }

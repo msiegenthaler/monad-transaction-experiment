@@ -1,5 +1,8 @@
 package example
 
+import scala.concurrent._
+import scala.concurrent.duration._
+import dispatch._
 import mt._
 import Transaction._
 
@@ -9,14 +12,22 @@ case class Price(dollars: Long) {
 
 /** Simulates external ressource such as webservice. */
 trait CarEstimator {
+  protected def estimatorUrl = "http://www.random.org/integers/"
+  protected def min = 0
+  protected def max = 100000
+  protected implicit def executor = ExecutionContext.global
 
   def estimate(car: Car) = {
-    val input = <car-name>{ car.name }</car-name>
-    for {
-      result <- Webservice("http://carestimator.org/estimate", input)
-      //just check if we got a result..
-      r = (result \ "result" \ "you-asked-for").size * 2000
-    } yield Price(r)
+    Webservice.get {
+      url(estimatorUrl).
+        addQueryParameter("num", "1").
+        addQueryParameter("base", "10").
+        addQueryParameter("col", "1").
+        addQueryParameter("format", "plain").
+        addQueryParameter("rnd", "new").
+        addQueryParameter("min", min.toString).
+        addQueryParameter("max", max.toString)
+    }.map(_.getResponseBody).map((p: String) => Price(p.trim.toLong))
   }
 
   def estimate(cars: List[Car]): Transaction[List[Price]] = cars.mapTransaction(estimate)

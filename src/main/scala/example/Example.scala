@@ -12,7 +12,7 @@ object Example extends App {
   val messaging = new ConnectionFactory
 
   // Usage example below
-  val carDomain = CarDomain(messaging, dataSource)
+  val carDomain = CarDomain(messaging, dataSource, Some(("proxy.bedag.ch", 8088)))
   import CarDomain.Services._
 
   //boot
