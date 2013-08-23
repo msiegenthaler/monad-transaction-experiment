@@ -15,10 +15,17 @@ trait CarService {
   } yield priced.sortBy(_.price.dollars).headOption
 
   def sell(car: Car, forPrice: Price) = for {
-    car <- repo.byId(car.id).map(_.getOrElse(throw new IllegalStateException("Car already sold")))
+    car <- repo.byId(car.id).map(_.getOrElse(throw new IllegalStateException(s"car ${car.id} already sold")))
     _ <- repo.remove(car.id)
     _ <- estimator.submitSale(car, forPrice)
   } yield ()
+
+  // same functionality as sell, but different style.
+  def sell2(car: Car, forPrice: Price) = lift { t =>
+    repo.byId(car.id)(t).getOrElse(throw new IllegalStateException(s"car ${car.id} already sold"))
+    repo.remove(car.id)(t)
+    estimator.submitSale(car, forPrice)(t)
+  }
 
   def buy(name: String) = repo.add(name).map(_ => ())
 }
