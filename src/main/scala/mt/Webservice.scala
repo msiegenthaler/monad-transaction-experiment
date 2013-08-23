@@ -11,7 +11,7 @@ trait Webservice extends TransactionContext {
 object Webservice {
   def apply(url: String, input: Elem) = Transaction.lift(_ match {
     case t: Webservice =>
-      println(s"Calling Webservice $url")
+      println(s"--> Calling Webservice $url")
       <response>
         <you-asked-for>{ input }</you-asked-for>
       </response>

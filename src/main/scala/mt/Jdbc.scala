@@ -9,12 +9,12 @@ trait Jdbc extends TransactionContext with CommitRollbackAware {
   lazy val jdbcConnection = dataSource.getConnection
 
   protected override def commit = {
-    println("JDBC commited")
+    println("-- JDBC commited")
     jdbcConnection.commit
     super.commit
   }
   protected override def rollback = {
-    println("JDBC commited")
+    println("-- JDBC commited")
     jdbcConnection.rollback
     super.rollback
   }
